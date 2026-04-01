@@ -6,13 +6,13 @@ import lexer.TokenType;
 import java.util.List;
 import java.util.Scanner;
 
-public class parser {
+public class Parser {
 
     private List<Token> tokens;
     private int pos;
     private Token current;
 
-    public parser(List<Token> tokens) {
+    public Parser(List<Token> tokens) {
         this.tokens = tokens;
         this.pos = 0;
         this.current = tokens.get(0);
@@ -130,14 +130,14 @@ public class parser {
 
         while (scanner.hasNextLine()) {
             String input = scanner.nextLine().trim();
-            if (input.equals("quit")) break;
+            if (input.equalsIgnoreCase("quit")) break;
             if (input.isEmpty()) continue;
 
             System.out.print("Postfix: ");
             try {
                 List<Token> tokens = new Lexer().tokenise(input);
                 if (tokens.isEmpty()) continue;  // lexer already printed error
-                parser parser = new parser(tokens);
+                Parser parser = new Parser(tokens);
                 parser.expr();
                 System.out.println();
             } catch (RuntimeException e) {
