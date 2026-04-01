@@ -1,21 +1,24 @@
 package parser;
 
-import lexer.Lexer;
-import lexer.Token;
-import lexer.TokenType;
 import java.util.List;
 import java.util.Scanner;
+import lexer.Lexer;
+import lexer.SymbolTable;
+import lexer.Token;
+import lexer.TokenType;
 
 public class Parser {
 
-    private List<Token> tokens;
+    private final List<Token> tokens;
+    private final SymbolTable symbolTable;
     private int pos;
     private Token current;
 
-    public Parser(List<Token> tokens) {
+    public Parser(List<Token> tokens, SymbolTable symbolTable) {
         this.tokens = tokens;
         this.pos = 0;
-        this.current = tokens.get(0);
+        this.current = tokens.getFirst();
+        this.symbolTable = symbolTable;
     }
 
     // advance to next token
@@ -112,9 +115,12 @@ public class Parser {
             advance();
 
         } else if (current.tokenType == TokenType.ID) {
-            System.out.print(current.value + " ");
-            advance();
+            //rather than print the lexeme print out the id from the symbol table
+            String name = (String) current.value;
 
+            SymbolTable.Symbol symbol = symbolTable.getOrInsert(name);
+            System.out.println(symbol.getValue() + " ");
+            advance();
         } else {
             throw new RuntimeException(
                     "Syntax error at token position " + pos
@@ -135,9 +141,10 @@ public class Parser {
 
             System.out.print("Postfix: ");
             try {
-                List<Token> tokens = new Lexer().tokenise(input);
+                SymbolTable symbolTable = new SymbolTable();
+                List<Token> tokens = new Lexer(symbolTable).tokenise(input);
                 if (tokens.isEmpty()) continue;  // lexer already printed error
-                Parser parser = new Parser(tokens);
+                Parser parser = new Parser(tokens, symbolTable);
                 parser.expr();
                 System.out.println();
             } catch (RuntimeException e) {
